@@ -97,18 +97,19 @@ jobs:
 
       - task: DotNetCoreCLI@2
         inputs:
-          command: 'push'
-          packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
-          nuGetFeedType: 'internal'
-          publishVstsFeed: 'afdc79d2-fcd6-4c6c-8158-fca14f5a834c'
+          command: "push"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
+          nuGetFeedType: "internal"
+          publishVstsFeed: "nuget-feed"
+          # publishVstsFeed: 'afdc79d2-fcd6-4c6c-8158-fca14f5a834c'
 
       - task: DotNetCoreCLI@2
         inputs:
-          command: 'push'
-          packagesToPush: '$(Build.ArtifactStagingDirectory)/*.snupkg'
-          nuGetFeedType: 'internal'
-          publishVstsFeed: 'afdc79d2-fcd6-4c6c-8158-fca14f5a834c'
-
+          command: "push"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.snupkg"
+          nuGetFeedType: "internal"
+          publishVstsFeed: "nuget-feed"
+          # publishVstsFeed: "afdc79d2-fcd6-4c6c-8158-fca14f5a834c"
 #      - task: DotNetCoreCLI@2
 #        displayName: Pack
 #        inputs:
