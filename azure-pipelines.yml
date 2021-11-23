@@ -38,16 +38,26 @@ jobs:
       - script: |
           echo '##vso[task.setvariable variable=semVer;isOutput=true]$(GitVersion.SemVer)'
           echo $(GitVersion.SemVer)
+          echo '##vso[task.setvariable variable=fullSemVer;isOutput=true]$(GitVersion.FullSemVer)'
+          echo $(GitVersion.fullSemVer)
+
         displayName: "bash script to set required variables"
         name: vars
 
   - job: DotNetCoreBuild
     displayName: Build and Test DotNetCore App
+    dependsOn:
+      - setVars
     variables:
       buildConfiguration: "Release"
       semVer: $[ dependencies.setVars.outputs['vars.semVer'] ]
+      fullSemVer: $[ dependencies.setVars.outputs['vars.fullSemVer'] ]
 
     steps:
+      - script: |
+          echo $(semVer)
+          echo $(shortSha)
+
       - task: UseDotNet@2
         displayName: "Use .NET Core sdk"
         inputs:
@@ -69,10 +79,22 @@ jobs:
           arguments: "--configuration $(buildConfiguration)"
 
       - task: DotNetCoreCLI@2
-        displayName: Pack
         inputs:
-          command: pack
-          arguments: " -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg"
+          command: "pack"
+          # packagesToPack: '**/*.csproj'
+          nobuild: true
+          includesymbols: true
+          includesource: true
+          versioningScheme: "byEnvVar"
+          versionEnvVar: "PACKAGE_VERSION"
+          verbosityPack: "Minimal"
+        env:
+          PACKAGE_VERSION: $(fullSemVer)
+#      - task: DotNetCoreCLI@2
+#        displayName: Pack
+#        inputs:
+#          command: pack
+#          arguments: "--no-build --verbosity Minimal -p:PackageVersion=$(semVer) -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg"
 #      - task: NuGetAuthenticate@0
 #        inputs:
 #          nuGetServiceConnections: "<NAME_OF_YOUR_NUGET_SERVICE_CONNECTION>"
