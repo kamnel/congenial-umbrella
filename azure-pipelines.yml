@@ -56,7 +56,7 @@ jobs:
     steps:
       - script: |
           echo $(semVer)
-          echo $(shortSha)
+          echo $(fullSemVer)
 
       - task: UseDotNet@2
         displayName: "Use .NET Core sdk"
@@ -89,7 +89,7 @@ jobs:
           versionEnvVar: "PACKAGE_VERSION"
           verbosityPack: "Minimal"
         env:
-          PACKAGE_VERSION: $(fullSemVer)
+          PACKAGE_VERSION: $(semVer)
 #      - task: DotNetCoreCLI@2
 #        displayName: Pack
 #        inputs:
