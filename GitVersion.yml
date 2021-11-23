@@ -1,0 +1,27 @@
+next-version: 1.0.0
+mode: Mainline
+branches:
+  develop:
+    mode: ContinuousDeployment
+    tag: alpha
+    increment: Patch
+  release:
+    mode: ContinuousDeployment
+    tag: beta
+    increment: Patch
+  hotfix:
+    mode: ContinuousDeployment
+    tag: beta
+    increment: Patch
+  main:
+    mode: ContinuousDelivery
+    tag: ""
+    increment: Patch
+  feature:
+    mode: ContinuousDelivery
+    tag: useBranchName
+    increment: Inherit
+  support:
+    mode: ContinuousDelivery
+    tag: ""
+    increment: Patch

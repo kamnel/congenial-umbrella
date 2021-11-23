@@ -14,47 +14,74 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  solution: "**/*.sln"
+  buildPlatform: "Any CPU"
+  buildConfiguration: "Release"
 
-steps:
-#       - task: NuGetAuthenticate@0
-- task: UseDotNet@2
-  displayName: "Use .NET Core sdk"
-  inputs:
-    version: 5.0.x
+jobs:
+  - job: setVars
+    displayName: "Set variables to use"
+    pool:
+      vmImage: "ubuntu-latest"
+    steps:
+      - script: |
+          if [[ -f global.json ]]; then
+            rm global.json
+          fi
+      - task: gitversion/setup@0
+        displayName: Install GitVersion
+        inputs:
+          versionSpec: "5.6.11"
+      - task: gitversion/execute@0
+        displayName: Determine Version
+      - script: |
+          echo '##vso[task.setvariable variable=semVer;isOutput=true]$(GitVersion.SemVer)'
+          echo $(GitVersion.SemVer)
+        displayName: "bash script to set required variables"
+        name: vars
 
-- task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    command: build
-    arguments: "--configuration $(buildConfiguration)"
+  - job: DotNetCoreBuild
+    displayName: Build and Test DotNetCore App
+    variables:
+      buildConfiguration: "Release"
+      semVer: $[ dependencies.setVars.outputs['vars.semVer'] ]
 
-- task: DotNetCoreCLI@2
-  displayName: Publish
-  inputs:
-    command: publish
-    publishWebProjects: false
-    zipAfterPublish: false
-    modifyOutputPath: false
-    arguments: "--configuration $(buildConfiguration)"
+    steps:
+      - task: UseDotNet@2
+        displayName: "Use .NET Core sdk"
+        inputs:
+          version: 5.0.x
 
-- task: DotNetCoreCLI@2
-  displayName: Pack
-  inputs:
-    command: pack
+      - task: DotNetCoreCLI@2
+        displayName: Build
+        inputs:
+          command: build
+          arguments: "--configuration $(buildConfiguration)"
 
-#- task: NuGetCommand@2
-#  name: "PackMigrations"
-#  inputs:
-#    command: "pack"
-#    packagesToPack: "gs-organisations-db.nuspec"
-#    versioningScheme: "byEnvVar"
-#    versionEnvVar: "PACKAGE_VERSION"
-#  env:
-#    PACKAGE_VERSION: $(semVer)
-#- task: NuGetToolInstaller@1
+      - task: DotNetCoreCLI@2
+        displayName: Publish
+        inputs:
+          command: publish
+          publishWebProjects: false
+          zipAfterPublish: false
+          modifyOutputPath: false
+          arguments: "--configuration $(buildConfiguration)"
 
+      - task: DotNetCoreCLI@2
+        displayName: Pack
+        inputs:
+          command: pack
+          arguments: " -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg"
+#      - task: NuGetAuthenticate@0
+#        inputs:
+#          nuGetServiceConnections: "<NAME_OF_YOUR_NUGET_SERVICE_CONNECTION>"
+#
+#      - task: NuGetCommand@2
+#        inputs:
+#          command: push
+#          nuGetFeedType: external
+#          versioningScheme: "byEnvVar"
+#          versionEnvVar: "PACKAGE_VERSION"
+#        env:
+#          PACKAGE_VERSION: $(semVer)
