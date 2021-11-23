@@ -91,6 +91,10 @@ jobs:
         env:
           PACKAGE_VERSION: $(semVer)
 
+      - task: NuGetAuthenticate@0
+        inputs:
+          forceReinstallCredentialProvider: true
+
       - task: DotNetCoreCLI@2
         inputs:
           command: 'push'
