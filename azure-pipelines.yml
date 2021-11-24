@@ -87,8 +87,8 @@ jobs:
 
       #      - script: |
       #          ls -al $(Build.ArtifactStagingDirectory)/*
-      - script: |
-          dotnet sourcelink test $(Build.ArtifactStagingDirectory)/Vista.Sample.Utils.Library.$(semVer).nupkg
+      #- script: |
+      #    dotnet sourcelink test $(Build.ArtifactStagingDirectory)/Vista.Sample.Utils.Library.$(semVer).nupkg
 
       - task: NuGetAuthenticate@0
         inputs:
