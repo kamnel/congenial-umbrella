@@ -67,16 +67,17 @@ jobs:
         displayName: Build
         inputs:
           command: build
-          arguments: "--configuration $(buildConfiguration)"
+          arguments: "--configuration $(buildConfiguration) /p:Version=$(semVer) /p:ContinuousIntegrationBuild=true /p:EmbedUntrackedSources=true"
+        #env:
+        #  PACKAGE_VERSION: $(semVer)
 
       - task: DotNetCoreCLI@2
-        displayName: Publish
         inputs:
-          command: publish
-          publishWebProjects: false
-          zipAfterPublish: false
-          modifyOutputPath: false
-          arguments: "--configuration $(buildConfiguration)"
+          command: "custom"
+          custom: "pack"
+          arguments: "--no-build --configuration $(buildConfiguration) --include-symbols --include-source /p:PackageVersion=$(semVer)"
+        #env:
+        #  PACKAGE_VERSION: $(semVer)
 
       - task: DotNetCoreCLI@2
         inputs:
@@ -109,21 +110,3 @@ jobs:
           packagesToPush: "$(Build.ArtifactStagingDirectory)/*.snupkg"
           nuGetFeedType: "internal"
           publishVstsFeed: "nuget-feed"
-          # publishVstsFeed: "afdc79d2-fcd6-4c6c-8158-fca14f5a834c"
-#      - task: DotNetCoreCLI@2
-#        displayName: Pack
-#        inputs:
-#          command: pack
-#          arguments: "--no-build --verbosity Minimal -p:PackageVersion=$(semVer) -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg"
-#      - task: NuGetAuthenticate@0
-#        inputs:
-#          nuGetServiceConnections: "<NAME_OF_YOUR_NUGET_SERVICE_CONNECTION>"
-#
-#      - task: NuGetCommand@2
-#        inputs:
-#          command: push
-#          nuGetFeedType: external
-#          versioningScheme: "byEnvVar"
-#          versionEnvVar: "PACKAGE_VERSION"
-#        env:
-#          PACKAGE_VERSION: $(semVer)
