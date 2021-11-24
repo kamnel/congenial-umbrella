@@ -52,13 +52,10 @@ jobs:
       buildConfiguration: "Release"
       semVer: $[ dependencies.setVars.outputs['vars.semVer'] ]
       fullSemVer: $[ dependencies.setVars.outputs['vars.fullSemVer'] ]
-    pool:
-      vmImage: windows-latest
 
     steps:
-      #      - script: |
-      #          echo $(semVer)
-      #          echo $(fullSemVer)
+      #- script: |
+      #  echo $(semVer)
 
       - task: UseDotNet@2
         displayName: "Use .NET Core sdk"
@@ -66,7 +63,7 @@ jobs:
           version: 5.0.x
 
       - task: DotNetCoreCLI@2
-        displayName: "dotnet pack"
+        displayName: "dotnet tool restore"
         inputs:
           command: "custom"
           custom: "tool"
@@ -83,12 +80,8 @@ jobs:
         inputs:
           command: "custom"
           custom: "pack"
-          arguments: "--configuration $(buildConfiguration) --include-symbols --include-source /p:SymbolPackageFormat=snupkg /p:PackageVersion=$(semVer) /p:Version=$(semVer) /p:ContinuousIntegrationBuild=true /p:EmbedUntrackedSources=true --output $(Build.ArtifactStagingDirectory)"
-
-      #      - script: |
-      #          ls -al $(Build.ArtifactStagingDirectory)/*
-      #- script: |
-      #    dotnet sourcelink test $(Build.ArtifactStagingDirectory)/Vista.Sample.Utils.Library.$(semVer).nupkg
+          arguments: "--configuration $(buildConfiguration) --include-symbols --include-source /p:PackageVersion=$(semVer) /p:Version=$(semVer) /p:ContinuousIntegrationBuild=true /p:EmbedUntrackedSources=true --output $(Build.ArtifactStagingDirectory)"
+          # /p:SymbolPackageFormat=snupkg
 
       - task: NuGetAuthenticate@0
         inputs:
@@ -98,21 +91,14 @@ jobs:
         displayName: "dotnet push *.nupkg"
         inputs:
           command: "push"
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg;$(Build.ArtifactStagingDirectory)/*.snupkg"
+          #packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg;$(Build.ArtifactStagingDirectory)/*.snupkg"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
           nuGetFeedType: "internal"
           publishVstsFeed: "nuget-feed"
 
       - task: PublishSymbols@2
         inputs:
-          SearchPattern: '**/bin/**/*.pdb'
-          SymbolServerType: 'TeamServices'
+          SearchPattern: "**/bin/**/*.pdb"
+          SymbolServerType: "TeamServices"
           TreatNotIndexedAsWarning: true
-          SymbolsVersion: '$(semVer)'
-
-#      - task: DotNetCoreCLI@2
-#        displayName: "dotnet push *.snupkg"
-#        inputs:
-#          command: "push"
-#          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.snupkg"
-#          nuGetFeedType: "internal"
-#          publishVstsFeed: "nuget-feed"
+          SymbolsVersion: "$(semVer)"
