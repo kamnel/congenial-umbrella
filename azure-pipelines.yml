@@ -101,6 +101,14 @@ jobs:
           packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg;$(Build.ArtifactStagingDirectory)/*.snupkg"
           nuGetFeedType: "internal"
           publishVstsFeed: "nuget-feed"
+
+      - task: PublishSymbols@2
+        inputs:
+          SearchPattern: '**/bin/**/*.pdb'
+          SymbolServerType: 'TeamServices'
+          TreatNotIndexedAsWarning: true
+          SymbolsVersion: '$(semVer)'
+
 #      - task: DotNetCoreCLI@2
 #        displayName: "dotnet push *.snupkg"
 #        inputs:
