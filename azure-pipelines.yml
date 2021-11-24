@@ -68,29 +68,12 @@ jobs:
         inputs:
           command: build
           arguments: "--configuration $(buildConfiguration) /p:Version=$(semVer) /p:ContinuousIntegrationBuild=true /p:EmbedUntrackedSources=true"
-        #env:
-        #  PACKAGE_VERSION: $(semVer)
 
       - task: DotNetCoreCLI@2
         inputs:
           command: "custom"
           custom: "pack"
           arguments: "--no-build --configuration $(buildConfiguration) --include-symbols --include-source /p:PackageVersion=$(semVer)"
-        #env:
-        #  PACKAGE_VERSION: $(semVer)
-
-      - task: DotNetCoreCLI@2
-        inputs:
-          command: "pack"
-          # packagesToPack: '**/*.csproj'
-          nobuild: true
-          includesymbols: true
-          includesource: true
-          versioningScheme: "byEnvVar"
-          versionEnvVar: "PACKAGE_VERSION"
-          verbosityPack: "Minimal"
-        env:
-          PACKAGE_VERSION: $(semVer)
 
       - task: NuGetAuthenticate@0
         inputs:
@@ -99,14 +82,6 @@ jobs:
       - task: DotNetCoreCLI@2
         inputs:
           command: "push"
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
-          nuGetFeedType: "internal"
-          publishVstsFeed: "nuget-feed"
-          # publishVstsFeed: 'afdc79d2-fcd6-4c6c-8158-fca14f5a834c'
-
-      - task: DotNetCoreCLI@2
-        inputs:
-          command: "push"
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.snupkg"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*nupkg"
           nuGetFeedType: "internal"
           publishVstsFeed: "nuget-feed"
