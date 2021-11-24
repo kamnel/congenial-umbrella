@@ -74,6 +74,7 @@ jobs:
           command: "custom"
           custom: "pack"
           arguments: "--no-build --configuration $(buildConfiguration) --include-symbols --include-source /p:PackageVersion=$(semVer)"
+          # -p:SymbolPackageFormat=snupkg
 
       - task: NuGetAuthenticate@0
         inputs:
@@ -82,6 +83,6 @@ jobs:
       - task: DotNetCoreCLI@2
         inputs:
           command: "push"
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*nupkg"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg;$(Build.ArtifactStagingDirectory)/*.snupkg"
           nuGetFeedType: "internal"
           publishVstsFeed: "nuget-feed"
