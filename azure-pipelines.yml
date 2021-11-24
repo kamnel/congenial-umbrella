@@ -64,12 +64,13 @@ jobs:
           version: 5.0.x
 
       - task: DotNetCoreCLI@2
-        displayName: Build
+        displayName: Build solution
         inputs:
           command: build
           arguments: "--configuration $(buildConfiguration) /p:Version=$(semVer) /p:ContinuousIntegrationBuild=true /p:EmbedUntrackedSources=true"
 
       - task: DotNetCoreCLI@2
+        displayName: "dotnet pack"
         inputs:
           command: "custom"
           custom: "pack"
@@ -81,8 +82,17 @@ jobs:
           forceReinstallCredentialProvider: true
 
       - task: DotNetCoreCLI@2
+        displayName: "dotnet push *.nupkg"
         inputs:
           command: "push"
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg;$(Build.ArtifactStagingDirectory)/*.snupkg"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
+          nuGetFeedType: "internal"
+          publishVstsFeed: "nuget-feed"
+
+      - task: DotNetCoreCLI@2
+        displayName: "dotnet push *.snupkg"
+        inputs:
+          command: "push"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.snupkg"
           nuGetFeedType: "internal"
           publishVstsFeed: "nuget-feed"
