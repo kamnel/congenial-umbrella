@@ -52,6 +52,8 @@ jobs:
       buildConfiguration: "Release"
       semVer: $[ dependencies.setVars.outputs['vars.semVer'] ]
       fullSemVer: $[ dependencies.setVars.outputs['vars.fullSemVer'] ]
+    pool:
+      vmImage: windows-latest
 
     steps:
       #- script: |
