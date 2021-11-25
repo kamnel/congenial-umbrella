@@ -105,6 +105,13 @@ jobs:
       #    TreatNotIndexedAsWarning: true
       #    SymbolsVersion: "$(semVer)"
 
+      - task: PublishBuildArtifacts@1
+        displayName: "Publish Build Artifacts for Windows Agent"
+        inputs:
+          PathtoPublish: "$(Build.ArtifactStagingDirectory)"
+          ArtifactName: "NupkgWithSymbols"
+          publishLocation: "Container"
+
   - job: WindowsPublishSymbols
     displayName: "Publish Symbols to Azure Symbol Server"
     dependsOn: DotNetCoreBuild
