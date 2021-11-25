@@ -105,14 +105,6 @@ jobs:
       #    TreatNotIndexedAsWarning: true
       #    SymbolsVersion: "$(semVer)"
 
-      #- task: NuGetCommand@2
-      #  inputs:
-      #    command: "push"
-      #    packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
-      #    nuGetFeedType: "internal"
-      #    publishVstsFeed: "afdc79d2-fcd6-4c6c-8158-fca14f5a834c"
-      #    allowPackageConflicts: true
-
   - job: WindowsPublishSymbols
     displayName: "Publish Symbols to Azure Symbol Server"
     dependsOn: DotNetCoreBuild
@@ -128,3 +120,35 @@ jobs:
           downloadType: "specific"
           itemPattern: "**/*.snupkg"
           downloadPath: "$(Build.ArtifactStagingDirectory)"
+
+      - task: PowerShell@2
+        inputs:
+          targetType: "inline"
+          script: |
+            Get-ChildItem -Recurse
+
+      - task: PowerShell@2
+        inputs:
+          targetType: "inline"
+          script: |
+            $sourceFiles = Get-ChildItem "$(Build.ArtifactStagingDirectory)\**\*.snupkg"
+                      
+            foreach ($file in $sourceFiles) {
+                $newfilename = "NupkgWithSymbols.zip"
+                Write-Host "Attempting to rename file $($file.fullName) to $($newfilename)"
+                Rename-Item $file.fullName -NewName $newfilename 
+                Write-Host "Rename File Success"
+            }
+
+      - task: ExtractFiles@1
+        inputs:
+          archiveFilePatterns: '$(Build.ArtifactStagingDirectory)\**\*.zip'
+          destinationFolder: "$(Build.ArtifactStagingDirectory)"
+          cleanDestinationFolder: false
+          overwriteExistingFiles: false
+
+      - task: PublishSymbols@2
+        displayName: "Publish Symbols"
+        inputs:
+          SearchPattern: '$(Build.ArtifactStagingDirectory)\**\*.pdb'
+          SymbolServerType: "TeamServices"
