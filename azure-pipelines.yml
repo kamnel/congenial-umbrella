@@ -82,33 +82,32 @@ jobs:
         inputs:
           command: "custom"
           custom: "pack"
-          arguments: "--no-build --configuration $(buildConfiguration) --include-symbols --include-source /p:PackageVersion=$(semVer) --output $(Build.ArtifactStagingDirectory)"
-          # /p:SymbolPackageFormat=snupkg
+          arguments: "--no-build --configuration $(buildConfiguration) --include-symbols --include-source /p:SymbolPackageFormat=snupkg /p:PackageVersion=$(semVer) --output $(Build.ArtifactStagingDirectory)"
 
       - task: NuGetAuthenticate@0
         inputs:
           forceReinstallCredentialProvider: true
 
-      #- task: DotNetCoreCLI@2
-      #  displayName: "dotnet push *.nupkg"
-      #  inputs:
-      #    command: "push"
-      #    #packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg;$(Build.ArtifactStagingDirectory)/*.snupkg"
-      #    packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
-      #    nuGetFeedType: "internal"
-      #    publishVstsFeed: "nuget-feed"
-      #
-      #- task: PublishSymbols@2
-      #  inputs:
-      #    SearchPattern: "**/bin/**/*.pdb"
-      #    SymbolServerType: "TeamServices"
-      #    TreatNotIndexedAsWarning: true
-      #    SymbolsVersion: "$(semVer)"
-
-      - task: NuGetCommand@2
+      - task: DotNetCoreCLI@2
+        displayName: "dotnet push *.nupkg"
         inputs:
           command: "push"
-          packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+          #packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg;$(Build.ArtifactStagingDirectory)/*.snupkg"
+          packagesToPush: "$(Build.ArtifactStagingDirectory)/*.nupkg"
           nuGetFeedType: "internal"
-          publishVstsFeed: "afdc79d2-fcd6-4c6c-8158-fca14f5a834c"
-          allowPackageConflicts: true
+          publishVstsFeed: "nuget-feed"
+
+      - task: PublishSymbols@2
+        inputs:
+          SearchPattern: "**/bin/**/*.pdb"
+          SymbolServerType: "TeamServices"
+          TreatNotIndexedAsWarning: true
+          SymbolsVersion: "$(semVer)"
+
+      #- task: NuGetCommand@2
+      #  inputs:
+      #    command: "push"
+      #    packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+      #    nuGetFeedType: "internal"
+      #    publishVstsFeed: "afdc79d2-fcd6-4c6c-8158-fca14f5a834c"
+      #    allowPackageConflicts: true
