@@ -121,11 +121,10 @@ jobs:
           itemPattern: "**/*.snupkg"
           downloadPath: "$(Build.ArtifactStagingDirectory)"
 
-      - task: PowerShell@2
+      - task: CmdLine@2
         inputs:
-          targetType: "inline"
-          script: |
-            Get-ChildItem -Recurse
+          script: 'dir /s'
+          workingDirectory: "$(Build.ArtifactStagingDirectory)"
 
       - task: PowerShell@2
         inputs:
